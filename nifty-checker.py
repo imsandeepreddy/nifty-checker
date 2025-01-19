@@ -42,7 +42,7 @@ def main():
         
         # Create a message
         message = (
-            f"*Google Finance Scraper*\n"
+            f"*Nippon India ETF Nifty 50 BeES*\n"
             f"Previous Close: ₹{prev_close}\n"
             f"1-Year High: ₹{high_1y}\n"
             f"Difference: ₹{difference:.2f} ({percentage_diff:.2f}%)\n"
