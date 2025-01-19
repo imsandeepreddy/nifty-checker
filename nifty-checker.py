@@ -15,7 +15,8 @@ def get_finance_data(url):
     # Extract values for previous close and all-time high
     try:
         prev_close = float(soup.find("div", {"class": "YMlKec fxKbKc"}).text.replace(",", "").strip("₹"))
-        high_1y = float(soup.find("div", {"class": "P6K39c"}).text.replace(",", "").strip("₹"))
+        #high_1y = float(soup.find("div", {"class": "P6K39c"}).text.replace(",", "").strip("₹"))
+        high_1y = 291.55
     except AttributeError as e:
         raise Exception("Failed to parse finance data. HTML structure might have changed.")
     
