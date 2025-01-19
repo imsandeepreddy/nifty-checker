@@ -2,7 +2,8 @@ name: Nifty Notification
 
 on:
   schedule:
-    - cron: "0 4 * * 1-5" # 9:30 AM IST (4:00 UTC)
+    #- cron: "0 4 * * 1-5" # 9:30 AM IST (4:00 UTC)
+    - cron: "0 4 * * *"
   workflow_dispatch: # Allow manual trigger
 
 jobs:
