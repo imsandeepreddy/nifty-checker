@@ -1,5 +1,5 @@
 import requests
-import BeautifulSoup
+from bs4 import BeautifulSoup
 
 # URL to scrape
 URL = "https://www.google.com/finance/quote/NIFTYBEES:NSE?window=1Y"
