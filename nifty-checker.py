@@ -1,9 +1,10 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 
 # Constants
-BOT_TOKEN = "TELEGRAM_BOT_TOKEN"  # Replace with your bot token
-CHAT_ID = "TELEGRAM_CHAT_ID"      # Replace with your chat ID
+BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")  # Fetch from environment variables
+CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")      # Fetch from environment variables
 URL = "https://www.google.com/finance/quote/NIFTYBEES:NSE?window=1Y"
 
 def get_finance_data(url):
