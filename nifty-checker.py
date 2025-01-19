@@ -1,68 +1,43 @@
 import requests
-import os
+from bs4 import BeautifulSoup
 
-# Constants for the API and Telegram Bot
-ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")  # Add this to GitHub Secrets
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")        # Add this to GitHub Secrets
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")            # Add this to GitHub Secrets
+# URL to scrape
+URL = "https://www.google.com/finance/quote/NIFTYBEES:NSE?window=1Y"
 
-# Nifty 50 Ticker Symbol (Example: "^NSEI" on Yahoo Finance or as per your API provider)
-NIFTY_TICKER = "^NSEI"
-
-# Function to fetch Nifty 50 data
-def get_nifty_data():
-    base_url = f"https://www.alphavantage.co/query"
-    params = {
-        "function": "TIME_SERIES_DAILY",
-        "symbol": NIFTY_TICKER,
-        "apikey": ALPHA_VANTAGE_API_KEY
-    }
-    
-    response = requests.get(base_url, params=params)
+def get_finance_data(url):
+    response = requests.get(url)
     if response.status_code != 200:
-        raise Exception("Failed to fetch Nifty 50 data")
+        raise Exception(f"Failed to fetch data. HTTP Status: {response.status_code}")
     
-    data = response.json()
+    # Parse the HTML
+    soup = BeautifulSoup(response.text, 'html.parser')
     
-    # Extracting today's open and 52-week high
-    time_series = data.get("Time Series (Daily)")
-    if not time_series:
-        raise Exception("Time Series data not found")
+    # Extract values for previous close and all-time high
+    try:
+        prev_close = float(soup.find("div", {"class": "YMlKec fxKbKc"}).text.replace(",", "").strip("₹"))
+        high_1y = float(soup.find("div", {"class": "P6K39c"}).text.replace(",", "").strip("₹"))
+    except AttributeError as e:
+        raise Exception("Failed to parse finance data. HTML structure might have changed.")
     
-    latest_date = max(time_series.keys())
-    latest_data = time_series[latest_date]
-    today_open = float(latest_data["1. open"])
-    
-    # Calculate 52-week high
-    highs = [float(day["2. high"]) for day in time_series.values()]
-    high_52_week = max(highs)
-    
-    return today_open, high_52_week
+    return prev_close, high_1y
 
-# Function to send message to Telegram
-def send_telegram_message(message):
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
-    response = requests.post(url, json=payload)
-    if response.status_code != 200:
-        raise Exception("Failed to send message to Telegram")
-
-# Main Function
 def main():
     try:
-        today_open, high_52_week = get_nifty_data()
-        difference = high_52_week - today_open
+        prev_close, high_1y = get_finance_data(URL)
+        difference = high_1y - prev_close
+        percentage_diff = (difference / high_1y) * 100
+        
+        # Create a message
         message = (
-            f"Nifty 50 Update:\n"
-            f"52-Week High: {high_52_week}\n"
-            f"Today's Open: {today_open}\n"
-            f"Difference: {difference:.2f} points\n"
+            f"Google Finance Scraper:\n"
+            f"Previous Close: ₹{prev_close}\n"
+            f"1-Year High: ₹{high_1y}\n"
+            f"Difference: ₹{difference:.2f} ({percentage_diff:.2f}%)\n"
         )
-        send_telegram_message(message)
-        print("Notification sent successfully.")
+        print(message)  # This will log to GitHub Actions
+
     except Exception as e:
         print(f"Error: {e}")
-        send_telegram_message(f"Error fetching Nifty 50 data: {e}")
 
 if __name__ == "__main__":
     main()
