@@ -1,3 +1,4 @@
 os
 requests
 python-telegram-bot
+BeautifulSoup
